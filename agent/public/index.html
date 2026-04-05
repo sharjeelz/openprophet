@@ -2809,15 +2809,15 @@ async function openRulesEditor() {
   overlay.style.cssText = 'position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;';
 
   overlay.innerHTML = `
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);background:var(--bg-card);flex-shrink:0">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:2px solid #333;background:#1a1a1a;flex-shrink:0">
       <div style="display:flex;align-items:center;gap:12px">
-        <button onclick="closeRulesEditor()" style="background:none;border:none;color:var(--ink-muted);cursor:pointer;font-size:18px;padding:4px 8px;border-radius:4px" title="Close">✕</button>
-        <span style="font-size:14px;font-weight:700;color:var(--text)">TRADING_RULES.md</span>
-        <span style="font-size:11px;color:var(--ink-muted);background:var(--bg-dark);padding:2px 8px;border-radius:10px">Changes take effect on next beat</span>
+        <span style="font-size:14px;font-weight:700;color:#fff">TRADING_RULES.md</span>
+        <span style="font-size:11px;color:#888;background:#2a2a2a;padding:2px 8px;border-radius:10px;border:1px solid #333">Changes take effect on next beat</span>
       </div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <span id="rules-save-status" style="font-size:12px;color:var(--ink-muted)"></span>
-        <button class="btn primary" onclick="saveRules()" style="min-width:80px">Save</button>
+      <div style="display:flex;gap:10px;align-items:center">
+        <span id="rules-save-status" style="font-size:12px;color:#888"></span>
+        <button onclick="saveRules()" style="background:#2563eb;color:#fff;border:none;padding:7px 18px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600">Save</button>
+        <button onclick="closeRulesEditor()" style="background:#333;color:#fff;border:none;padding:7px 14px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600">✕ Close</button>
       </div>
     </div>
     <div style="flex:1;overflow:hidden;display:flex">
