@@ -15,29 +15,26 @@ COPY services/ ./services/
 
 RUN CGO_ENABLED=1 GOOS=linux go build -o prophet_bot ./cmd/bot
 
-# ── Stage 2: Install OpenCode ──────────────────────────────────────────
-FROM node:24-bookworm-slim AS opencode-installer
-
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
-RUN npm install -g opencode-ai@1.3.3 opencode-linux-x64
-
-# ── Stage 3: Final image ───────────────────────────────────────────────
+# ── Stage 2: Final image ───────────────────────────────────────────────
 FROM node:24-bookworm-slim
 
-# System deps for better-sqlite3 / sqlite-vec native bindings
+# System deps for better-sqlite3 / sqlite-vec native bindings + opencode install
 RUN apt-get update && apt-get install -y \
-    python3 make g++ \
+    python3 make g++ curl \
     && rm -rf /var/lib/apt/lists/*
+
+# Install OpenCode and all Linux platform binaries in one shot so
+# opencode-ai can find its native binary in the same node_modules tree
+RUN npm install -g opencode-ai@1.3.3 \
+    opencode-linux-x64 \
+    opencode-linux-x64-baseline \
+    2>/dev/null; true
 
 WORKDIR /app
 
 # Copy Go binary from builder
 COPY --from=go-builder /build/prophet_bot ./prophet_bot
 RUN chmod +x ./prophet_bot
-
-# Copy OpenCode CLI from installer stage
-COPY --from=opencode-installer /usr/local/lib/node_modules/opencode-ai /usr/local/lib/node_modules/opencode-ai
-COPY --from=opencode-installer /usr/local/bin/opencode /usr/local/bin/opencode
 
 # Install Node dependencies
 COPY package.json package-lock.json ./
