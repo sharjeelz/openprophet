@@ -2793,7 +2793,89 @@ async function submitAgentFromBuilder(agentId, sandboxId) {
 }
 
 function editAgent(id) { const a = config.agents.find(x => x.id === id); if(a) showModal('agent-edit', a); }
-function editStrategy(id) { const s = config.strategies.find(x => x.id === id); if(s) showModal('strategy-edit', s); }
+function editStrategy(id) {
+  const s = config.strategies.find(x => x.id === id);
+  if (!s) return;
+  // Default strategy uses TRADING_RULES.md — open full-page file editor
+  if (s.rulesFile || id === 'default') { openRulesEditor(); return; }
+  showModal('strategy-edit', s);
+}
+
+// ── Full-page trading rules editor ──────────────────────────────────
+async function openRulesEditor() {
+  // Create overlay
+  const overlay = document.createElement('div');
+  overlay.id = 'rules-editor-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;';
+
+  overlay.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);background:var(--bg-card);flex-shrink:0">
+      <div style="display:flex;align-items:center;gap:12px">
+        <button onclick="closeRulesEditor()" style="background:none;border:none;color:var(--ink-muted);cursor:pointer;font-size:18px;padding:4px 8px;border-radius:4px" title="Close">✕</button>
+        <span style="font-size:14px;font-weight:700;color:var(--text)">TRADING_RULES.md</span>
+        <span style="font-size:11px;color:var(--ink-muted);background:var(--bg-dark);padding:2px 8px;border-radius:10px">Changes take effect on next beat</span>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span id="rules-save-status" style="font-size:12px;color:var(--ink-muted)"></span>
+        <button class="btn primary" onclick="saveRules()" style="min-width:80px">Save</button>
+      </div>
+    </div>
+    <div style="flex:1;overflow:hidden;display:flex">
+      <textarea id="rules-editor-textarea" spellcheck="false"
+        style="flex:1;background:var(--bg-dark);color:var(--text);border:none;outline:none;padding:20px;font-family:'JetBrains Mono','Fira Code','Courier New',monospace;font-size:13px;line-height:1.6;resize:none;tab-size:2;white-space:pre;overflow:auto;"
+        placeholder="Loading..."></textarea>
+    </div>`;
+
+  document.body.appendChild(overlay);
+
+  // Load file content
+  try {
+    const r = await fetch('/api/rules');
+    const d = await r.json();
+    document.getElementById('rules-editor-textarea').value = d.content || '';
+  } catch(e) {
+    document.getElementById('rules-editor-textarea').value = '# Error loading rules\n' + e.message;
+  }
+
+  // Tab key inserts spaces instead of losing focus
+  document.getElementById('rules-editor-textarea').addEventListener('keydown', function(e) {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const start = this.selectionStart, end = this.selectionEnd;
+      this.value = this.value.substring(0, start) + '  ' + this.value.substring(end);
+      this.selectionStart = this.selectionEnd = start + 2;
+    }
+    // Ctrl+S / Cmd+S to save
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveRules(); }
+  });
+}
+
+function closeRulesEditor() {
+  const el = document.getElementById('rules-editor-overlay');
+  if (el) el.remove();
+}
+
+async function saveRules() {
+  const content = document.getElementById('rules-editor-textarea')?.value;
+  if (content === undefined) return;
+  const status = document.getElementById('rules-save-status');
+  status.textContent = 'Saving...';
+  status.style.color = 'var(--ink-muted)';
+  try {
+    const r = await fetch('/api/rules', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content }),
+    });
+    if (!r.ok) throw new Error((await r.json()).error || 'Failed');
+    status.textContent = 'Saved ✓';
+    status.style.color = 'var(--success)';
+    setTimeout(() => { if(status) status.textContent = ''; }, 3000);
+  } catch(e) {
+    status.textContent = 'Error: ' + e.message;
+    status.style.color = 'var(--error)';
+  }
+}
 function v(id) { const e = document.getElementById(id); return e ? (e.type==='checkbox'?e.checked:e.value) : ''; }
 
 // ── Clock ──────────────────────────────────

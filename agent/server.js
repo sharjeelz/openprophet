@@ -1229,6 +1229,29 @@ app.delete('/api/strategies/:id', async (req, res) => {
   } catch (err) { res.status(400).json({ error: err.message }); }
 });
 
+// ── Trading Rules file editor ───────────────────────────────────────
+const RULES_FILE = path.join(PROJECT_ROOT, 'TRADING_RULES.md');
+
+app.get('/api/rules', async (req, res) => {
+  try {
+    const content = await fs.readFile(RULES_FILE, 'utf-8');
+    res.json({ content });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/rules', async (req, res) => {
+  try {
+    const { content } = req.body;
+    if (typeof content !== 'string') return res.status(400).json({ error: 'content required' });
+    await fs.writeFile(RULES_FILE, content, 'utf-8');
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Model selection
 app.get('/api/models', (req, res) => {
   const config = getConfig();
