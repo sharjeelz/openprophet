@@ -19,7 +19,7 @@ RUN CGO_ENABLED=1 GOOS=linux go build -o prophet_bot ./cmd/bot
 FROM node:24-bookworm-slim AS opencode-installer
 
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
-RUN npm install -g opencode-ai@1.3.3
+RUN npm install -g opencode-ai@1.3.3 opencode-linux-x64
 
 # ── Stage 3: Final image ───────────────────────────────────────────────
 FROM node:24-bookworm-slim

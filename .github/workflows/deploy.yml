@@ -1,11 +1,42 @@
-name: Deploy to Server
+name: Build & Deploy
 
 on:
   push:
     branches: [main]
 
 jobs:
+  build:
+    name: Build checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+          cache: true
+
+      - name: Build Go binary
+        run: CGO_ENABLED=1 go build -o prophet_bot ./cmd/bot
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install Node dependencies
+        run: npm ci --omit=dev
+
+      - name: Check Node syntax (server + mcp)
+        run: |
+          node --check agent/server.js
+          node --check mcp-server.js
+
   deploy:
+    name: Deploy to server
+    needs: build          # ← only runs if build job passes
     runs-on: ubuntu-latest
     steps:
       - name: Deploy via SSH
