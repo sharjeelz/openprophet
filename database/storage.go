@@ -254,9 +254,18 @@ func (s *LocalStorage) SavePosition(position *interfaces.Position) error {
 		SnapshotTime:   time.Now(),
 	}
 
-	result := s.db.Save(dbPosition)
+	result := s.db.Where(models.DBPosition{Symbol: dbPosition.Symbol}).
+		Assign(dbPosition).
+		FirstOrCreate(dbPosition)
 	if result.Error != nil {
 		return fmt.Errorf("failed to save position: %w", result.Error)
+	}
+	if result.RowsAffected == 0 {
+		// Record exists, update it
+		result = s.db.Model(dbPosition).Where("symbol = ?", dbPosition.Symbol).Updates(dbPosition)
+		if result.Error != nil {
+			return fmt.Errorf("failed to update position: %w", result.Error)
+		}
 	}
 
 	return nil

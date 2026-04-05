@@ -1,0 +1,11 @@
+node_modules
+data/
+prophet_bot
+prophet_bot.exe
+*.log
+*.pid
+.env
+opencode.jsonc
+.git
+.gitignore
+tg_test.mjs

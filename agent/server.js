@@ -50,8 +50,8 @@ app.use(express.json({ limit: '1mb' }));
 const AUTH_TOKEN = process.env.AGENT_AUTH_TOKEN || '';
 function authMiddleware(req, res, next) {
   if (!AUTH_TOKEN) return next(); // no token configured = open access
-  // Allow health check unauthenticated
-  if (req.path === '/api/health') return next();
+  // Allow health check and SSE events unauthenticated
+  if (req.path === '/api/health' || req.path === '/api/events') return next();
   // Check Authorization header or query param
   const header = req.headers.authorization;
   const token = header?.startsWith('Bearer ') ? header.slice(7) : req.query.token;
@@ -69,40 +69,37 @@ async function startGoBackend(account) {
   // Kill existing if running
   await stopGoBackend();
 
-  if (!account) {
-    console.log('  No active account — Go backend not started');
-    return false;
-  }
-
   // Build binary if needed
-  const binaryPath = path.join(PROJECT_ROOT, 'prophet_bot');
+  const binaryName = process.platform === 'win32' ? 'prophet_bot.exe' : 'prophet_bot';
+  const binaryPath = path.join(PROJECT_ROOT, binaryName);
   try {
     const fs = await import('fs');
     if (!fs.existsSync(binaryPath)) {
       console.log('  Building Go binary...');
-      execSync('go build -o prophet_bot ./cmd/bot', { cwd: PROJECT_ROOT, timeout: 60000 });
+      execSync(`go build -o ${binaryName} ./cmd/bot`, { cwd: PROJECT_ROOT, timeout: 60000 });
     }
   } catch (err) {
     console.error('  Failed to build Go binary:', err.message);
     return false;
   }
 
+  const accountId = account?.id || 'research';
   const env = {
     ...process.env,
-    ALPACA_API_KEY: account.publicKey,
-    ALPACA_SECRET_KEY: account.secretKey,
-    ALPACA_BASE_URL: account.baseUrl || (account.paper ? 'https://paper-api.alpaca.markets' : 'https://api.alpaca.markets'),
-    ALPACA_PAPER: account.paper ? 'true' : 'false',
+    ALPACA_API_KEY: account?.publicKey || 'research_mode',
+    ALPACA_SECRET_KEY: account?.secretKey || 'research_mode',
+    ALPACA_BASE_URL: account?.baseUrl || (account?.paper ? 'https://paper-api.alpaca.markets' : 'https://paper-api.alpaca.markets'),
+    ALPACA_PAPER: account?.paper ? 'true' : 'true',
     PORT: TRADING_BOT_PORT,
-    DATABASE_PATH: getSandboxDbPathForAccount(account.id),
-    ACTIVITY_LOG_DIR: path.join(PROJECT_ROOT, 'data', 'sandboxes', account.id, 'activity_logs'),
-    OPENPROPHET_ACCOUNT_ID: account.id,
-    OPENPROPHET_SANDBOX_ID: `sbx_${account.id}`,
+    DATABASE_PATH: getSandboxDbPathForAccount(accountId),
+    ACTIVITY_LOG_DIR: path.join(PROJECT_ROOT, 'data', 'sandboxes', accountId, 'activity_logs'),
+    OPENPROPHET_ACCOUNT_ID: accountId,
+    OPENPROPHET_SANDBOX_ID: `sbx_${accountId}`,
   };
 
   await fs.mkdir(path.dirname(env.DATABASE_PATH), { recursive: true });
 
-  console.log(`  Starting Go backend for account "${account.name}" (${account.paper ? 'paper' : 'live'})...`);
+  console.log(`  Starting Go backend${account ? ` for account "${account.name}" (${account.paper ? 'paper' : 'live'})` : ' in research mode (no account)'}...`);
 
   goProc = spawn(binaryPath, [], {
     cwd: PROJECT_ROOT,
@@ -144,7 +141,7 @@ async function startGoBackend(account) {
     try {
       await goAxios.get('/health', { timeout: 2000 });
       goReady = true;
-      console.log(`  Go backend ready on port ${TRADING_BOT_PORT} (account: ${account.name})`);
+      console.log(`  Go backend ready on port ${TRADING_BOT_PORT} (account: ${account?.name ?? 'research mode'})`);
       broadcast('agent_log', {
         message: `Trading backend started for account "${account.name}" (${account.paper ? 'paper' : 'live'})`,
         level: 'success',
@@ -507,8 +504,8 @@ app.post('/api/manager/message', async (req, res) => {
 
     const config = getConfig();
     const mgr = config.manager || {};
-    const model = mgr.model || config.activeModel || 'anthropic/claude-sonnet-4-6';
-    const ocModel = model.includes('/') ? model : `anthropic/${model}`;
+    const model = config.activeModel || mgr.model || 'opencode/claude-sonnet-4-6';
+    const ocModel = model.includes('/') ? model : `opencode/${model}`;
     const customPromptAddition = mgr.customPrompt ? `\n\n## Custom Instructions\n${mgr.customPrompt}` : '';
     
     const managerPrompt = `You are the OpenProphet Manager — a configuration and research assistant.
@@ -589,8 +586,12 @@ ${message.trim()}${customPromptAddition}`;
 
     const proc = spawn('opencode', args, {
       cwd: process.cwd(),
+      shell: process.platform === 'win32',
       env: { ...process.env },
       stdio: ['pipe', 'pipe', 'pipe'],
+    });
+    proc.on('error', (err) => {
+      broadcast('manager_log', { message: `Failed to spawn opencode: ${err.message}`, level: 'error' });
     });
     _managerProc = proc;
 
@@ -610,18 +611,20 @@ ${message.trim()}${customPromptAddition}`;
         try {
           const evt = JSON.parse(line);
           const part = evt.part || {};
-          
+          console.log(`[manager-evt] type=${evt.type} partType=${part.type} text=${String(part.text||'').substring(0,80)}`);
+
           if (evt.type === 'text') {
             const text = part.text || evt.text || '';
             if (text) broadcast('manager_text', { text });
-          } else if (evt.type === 'tool_call') {
-            const name = part.name || part.tool || evt.name || '?';
-            const args = part.args || part.input || {};
+          } else if (evt.type === 'tool_use') {
+            // tool_use events have: part.tool (name), part.state.input (args), part.state.output (result)
+            const name = (part.tool || '?').replace('prophet_', '');
+            const args = part.state?.input || part.args || part.input || {};
             broadcast('manager_tool', { name, args });
-          } else if (evt.type === 'tool_result') {
-            const name = part.name || '?';
-            const result = String(part.result || part.output || '').substring(0, 200);
-            broadcast('manager_tool_result', { name, result });
+            // Also emit the result since tool_use includes both call and result
+            const output = part.state?.output || '';
+            const result = String(typeof output === 'string' ? output : JSON.stringify(output)).substring(0, 200);
+            if (result) broadcast('manager_tool_result', { name, result });
           }
           
           // Capture session ID
@@ -632,8 +635,12 @@ ${message.trim()}${customPromptAddition}`;
       }
     });
 
-    proc.stderr.on('data', () => {});
-    proc.on('close', () => {
+    proc.stderr.on('data', (chunk) => {
+      const msg = chunk.toString().trim();
+      if (msg) broadcast('manager_log', { message: `[opencode] ${msg}`, level: 'error' });
+    });
+    proc.on('close', (code) => {
+      broadcast('manager_log', { message: `opencode exited (code: ${code})`, level: 'info' });
       if (_managerProc === proc) _managerProc = null;
       // Update session tracking
       const last = _managerSessions[_managerSessions.length - 1];
@@ -853,6 +860,11 @@ app.post('/api/sandboxes/:id/message', async (req, res) => {
     const sandboxId = req.params.id;
     if (!message?.trim()) return res.status(400).json({ error: 'Message is required' });
 
+    // Manager tab uses '_manager' as a virtual sandbox ID — forward to manager chat
+    if (sandboxId === '_manager') {
+      return res.redirect(307, '/api/manager/message');
+    }
+
     const config = getConfig();
     const trimmed = message.trim();
     
@@ -1045,7 +1057,8 @@ app.get('/api/config', (req, res) => {
 app.get('/api/agent/prompt-preview', async (req, res) => {
   try {
     const sandboxId = req.query.sandboxId || getActiveSandbox()?.id;
-    const agentConfig = sandboxId ? getResolvedAgentForSandbox(sandboxId) : getActiveAgent();
+    const agentConfig = (sandboxId ? getResolvedAgentForSandbox(sandboxId) : null) || getActiveAgent();
+    if (!agentConfig) return res.status(404).json({ error: 'No active agent configured' });
     const prompt = await buildSystemPrompt(agentConfig, { getStrategyById });
     res.json({ prompt, agentName: agentConfig.name, sandboxId });
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -1458,8 +1471,10 @@ app.post('/api/auth/login', (req, res) => {
   // Spawn opencode auth login and capture the URL
   const proc = spawn('opencode', ['auth', 'login'], {
     stdio: ['pipe', 'pipe', 'pipe'],
+    shell: process.platform === 'win32',
     env: { ...process.env, BROWSER: 'echo' }, // prevent auto-opening browser
   });
+  proc.on('error', (err) => res.status(500).json({ error: err.message }));
 
   let output = '';
   let urlSent = false;
@@ -1562,11 +1577,7 @@ for (const sandbox of getSandboxes()) {
 
 // Start Go backend with active account
 const activeAccount = getActiveAccount();
-if (activeAccount) {
-  await startGoBackend(activeAccount);
-} else {
-  console.log('  No active account configured — Go backend not started');
-}
+await startGoBackend(activeAccount || null);
 
 // Graceful shutdown
 process.on('SIGTERM', async () => {

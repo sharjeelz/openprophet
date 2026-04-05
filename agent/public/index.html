@@ -749,125 +749,253 @@
     <!-- About Panel -->
     <div class="panel" id="panel-about">
       <div class="settings-content" style="max-width:720px;margin:0 auto">
-        
+
         <!-- Hero -->
         <div style="text-align:center;padding:40px 0 32px">
           <h1 style="font-family:'Crimson Pro',Georgia,serif;font-size:36px;font-weight:700;color:var(--text);margin:0">
             <span style="color:var(--accent)">Open</span>Prophet
           </h1>
           <p style="font-size:15px;color:var(--ink-muted);margin-top:8px;line-height:1.6">
-            Autonomous AI trading agent powered by <a href="https://opencode.ai" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:600">OpenCode</a>.<br>
-            Use any model you want. Multi-account, multi-agent orchestration<br>with real-time market intelligence.
+            Autonomous AI options trading agent.<br>
+            Powered by Claude + Alpaca. Runs 24/7. No human needed.
           </p>
         </div>
 
         <!-- Disclaimer -->
-        <div style="padding:14px 18px;background:rgba(234,179,8,0.08);border:1px solid rgba(234,179,8,0.25);border-radius:8px;margin-bottom:24px">
-          <div style="font-size:12px;font-weight:700;color:#eab308;margin-bottom:4px">Disclaimer</div>
+        <div style="padding:14px 18px;background:rgba(234,179,8,0.08);border:1px solid rgba(234,179,8,0.25);border-radius:8px;margin-bottom:28px">
+          <div style="font-size:12px;font-weight:700;color:#eab308;margin-bottom:4px">Risk Warning</div>
           <p style="font-size:11px;color:var(--ink-muted);line-height:1.6;margin:0">
-            This software is provided as-is with <strong>no warranties of any kind</strong>, express or implied.
-            This is <strong>not financial advice</strong>. The creator is not a licensed financial professional.
-            Use of live trading (non-paper) accounts is <strong>strongly discouraged</strong> and entirely at your own risk.
-            You are solely responsible for any trades executed and any financial losses incurred.
-            Paper trading is recommended for experimentation and learning purposes only.
+            This is <strong>not financial advice</strong>. Options trading involves substantial risk of loss.
+            Paper trading is recommended. You are solely responsible for any trades executed and financial losses incurred.
           </p>
         </div>
 
-        <!-- Creator -->
-        <div style="display:flex;align-items:center;gap:16px;padding:20px;background:var(--bg-dark);border:1px solid var(--border);border-radius:8px;margin-bottom:24px">
-          <img src="img/jake.jpg" alt="Jake Nesler" style="width:56px;height:56px;border-radius:50%;object-fit:cover;border:2px solid var(--border)">
-          <div style="flex:1">
-            <div style="font-size:15px;font-weight:600;color:var(--text)">Jake Nesler</div>
-            <div style="font-size:12px;color:var(--ink-muted);margin-top:2px">Creator</div>
-            <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:6px">
-              <a href="https://github.com/jakenesler" target="_blank" style="font-size:12px;color:var(--accent);text-decoration:none">GitHub</a>
-              <a href="https://www.linkedin.com/in/jakenesler" target="_blank" style="font-size:12px;color:var(--accent);text-decoration:none">LinkedIn</a>
-              <a href="https://medium.com/@jakenesler" target="_blank" style="font-size:12px;color:var(--accent);text-decoration:none">Medium</a>
-              <a href="https://buymeacoffee.com/jakenesleri" target="_blank" style="font-size:12px;color:var(--accent);text-decoration:none">Buy me a coffee</a>
+        <!-- How It Works -->
+        <div style="margin-bottom:32px">
+          <h3 style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--ink-muted);margin-bottom:16px">How It Works</h3>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;gap:14px;padding:16px;background:var(--bg-dark);border:1px solid var(--border);border-radius:8px;align-items:flex-start">
+              <div style="width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">1</div>
+              <div><div style="font-size:13px;font-weight:600;color:var(--text)">Heartbeat Loop</div><div style="font-size:12px;color:var(--ink-muted);margin-top:3px;line-height:1.5">Claude wakes up automatically on a schedule tied to market hours. Each wake-up is called a <strong>beat</strong>. Between beats the agent is idle — no CPU, no cost.</div></div>
+            </div>
+            <div style="display:flex;gap:14px;padding:16px;background:var(--bg-dark);border:1px solid var(--border);border-radius:8px;align-items:flex-start">
+              <div style="width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">2</div>
+              <div><div style="font-size:13px;font-weight:600;color:var(--text)">Research & Analysis</div><div style="font-size:12px;color:var(--ink-muted);margin-top:3px;line-height:1.5">Each beat Claude fetches live news, MarketWatch headlines, technical indicators (RSI, MACD), options chains, and account status via 45+ MCP tools.</div></div>
+            </div>
+            <div style="display:flex;gap:14px;padding:16px;background:var(--bg-dark);border:1px solid var(--border);border-radius:8px;align-items:flex-start">
+              <div style="width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">3</div>
+              <div><div style="font-size:13px;font-weight:600;color:var(--text)">Strategy Rules</div><div style="font-size:12px;color:var(--ink-muted);margin-top:3px;line-height:1.5">Claude follows <strong>TRADING_RULES.md</strong> — instruments, DTE range, delta, position sizing (5% per trade), stop loss (-25%), profit target (+40%), max 3 trades/session.</div></div>
+            </div>
+            <div style="display:flex;gap:14px;padding:16px;background:var(--bg-dark);border:1px solid var(--border);border-radius:8px;align-items:flex-start">
+              <div style="width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">4</div>
+              <div><div style="font-size:13px;font-weight:600;color:var(--text)">Order Execution</div><div style="font-size:12px;color:var(--ink-muted);margin-top:3px;line-height:1.5">When a setup passes all filters, Claude places a <strong>limit options order</strong> on Alpaca at mid-price. Contract quantity is calculated from your real account balance automatically.</div></div>
+            </div>
+            <div style="display:flex;gap:14px;padding:16px;background:var(--bg-dark);border:1px solid var(--border);border-radius:8px;align-items:flex-start">
+              <div style="width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">5</div>
+              <div><div style="font-size:13px;font-weight:600;color:var(--text)">Position Management</div><div style="font-size:12px;color:var(--ink-muted);margin-top:3px;line-height:1.5">Every beat Claude checks open positions. Stop hit (-25%), target hit (+40%), or thesis broken → it closes the position. No manual intervention needed.</div></div>
             </div>
           </div>
         </div>
 
-        <!-- Featured Article -->
-        <a href="https://medium.com/@jakenesler/i-gave-claude-code-100k-to-trade-with-in-the-last-month-and-beat-the-market-ece3fd6dcebc" target="_blank" rel="noopener" style="display:block;padding:16px 20px;background:var(--bg-dark);border:1px solid var(--border);border-radius:8px;text-decoration:none;margin-bottom:24px;transition:border-color 0.2s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
-          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--accent);margin-bottom:6px">Featured on Medium</div>
-          <div style="font-size:14px;font-weight:600;color:var(--text);line-height:1.4">I Gave Claude Code $100K to Trade With in the Last Month and Beat the Market</div>
-          <div style="font-size:11px;color:var(--ink-faint);margin-top:6px">medium.com/@jakenesler &rarr;</div>
-        </a>
-
-        <!-- Support -->
-        <div style="text-align:center;margin-bottom:32px">
-          <a href="https://buymeacoffee.com/jakenesleri" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:10px;padding:12px 28px;background:#FFDD00;color:#000;border-radius:10px;text-decoration:none;font-size:15px;font-weight:600;transition:transform 0.15s,box-shadow 0.15s;box-shadow:0 2px 8px rgba(255,221,0,0.3)" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 14px rgba(255,221,0,0.4)'" onmouseout="this.style.transform='';this.style.boxShadow='0 2px 8px rgba(255,221,0,0.3)'">
-            <span style="font-size:22px">&#9749;</span> Buy me a coffee
-          </a>
+        <!-- Heartbeat Schedule -->
+        <div style="margin-bottom:32px">
+          <h3 style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--ink-muted);margin-bottom:6px">Heartbeat Schedule</h3>
+          <p style="font-size:12px;color:var(--ink-faint);margin-bottom:14px;line-height:1.5">The agent wakes up more frequently during high-activity market hours and slows down when markets are quiet. All times are US Eastern.</p>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="display:grid;grid-template-columns:140px 80px 1fr;gap:12px;padding:10px 14px;background:var(--bg-dark);border:1px solid var(--border);border-radius:6px;font-size:12px;align-items:center">
+              <span style="font-weight:600;color:var(--text)">Pre-Market</span>
+              <span style="font-family:'IBM Plex Mono',monospace;color:var(--accent);font-size:11px">4:00–9:30 AM</span>
+              <span style="color:var(--ink-muted)">Every 15 min — gather intelligence, review overnight news, plan the session</span>
+            </div>
+            <div style="display:grid;grid-template-columns:140px 80px 1fr;gap:12px;padding:10px 14px;background:var(--bg-dark);border:1px solid rgba(var(--accent-rgb),0.4);border-radius:6px;font-size:12px;align-items:center">
+              <span style="font-weight:600;color:var(--text)">Market Open 🔥</span>
+              <span style="font-family:'IBM Plex Mono',monospace;color:var(--accent);font-size:11px">9:30–10:30 AM</span>
+              <span style="color:var(--ink-muted)">Every 2 min — highest frequency. Best window for momentum entries. Agent most active here.</span>
+            </div>
+            <div style="display:grid;grid-template-columns:140px 80px 1fr;gap:12px;padding:10px 14px;background:var(--bg-dark);border:1px solid var(--border);border-radius:6px;font-size:12px;align-items:center">
+              <span style="font-weight:600;color:var(--text)">Midday</span>
+              <span style="font-family:'IBM Plex Mono',monospace;color:var(--accent);font-size:11px">10:30 AM–3 PM</span>
+              <span style="color:var(--ink-muted)">Every 10 min — monitor positions, watch for VWAP setups, manage stops</span>
+            </div>
+            <div style="display:grid;grid-template-columns:140px 80px 1fr;gap:12px;padding:10px 14px;background:var(--bg-dark);border:1px solid rgba(var(--accent-rgb),0.4);border-radius:6px;font-size:12px;align-items:center">
+              <span style="font-weight:600;color:var(--text)">Market Close 🔥</span>
+              <span style="font-family:'IBM Plex Mono',monospace;color:var(--accent);font-size:11px">3:00–4:00 PM</span>
+              <span style="color:var(--ink-muted)">Every 2 min — decide holds vs. closes, manage end-of-day risk</span>
+            </div>
+            <div style="display:grid;grid-template-columns:140px 80px 1fr;gap:12px;padding:10px 14px;background:var(--bg-dark);border:1px solid var(--border);border-radius:6px;font-size:12px;align-items:center">
+              <span style="font-weight:600;color:var(--text)">After Hours</span>
+              <span style="font-family:'IBM Plex Mono',monospace;color:var(--accent);font-size:11px">4:00–8:00 PM</span>
+              <span style="color:var(--ink-muted)">Every 30 min — review session, log activity, assess overnight holds</span>
+            </div>
+            <div style="display:grid;grid-template-columns:140px 80px 1fr;gap:12px;padding:10px 14px;background:var(--bg-dark);border:1px solid var(--border);border-radius:6px;font-size:12px;align-items:center">
+              <span style="font-weight:600;color:var(--text)">Markets Closed</span>
+              <span style="font-family:'IBM Plex Mono',monospace;color:var(--accent);font-size:11px">Overnight</span>
+              <span style="color:var(--ink-muted)">Every 1 hour — minimal activity, monitors for major news events</span>
+            </div>
+          </div>
+          <div style="margin-top:12px;padding:12px 14px;background:rgba(var(--accent-rgb),0.05);border:1px solid var(--border);border-radius:6px;font-size:12px;color:var(--ink-muted);line-height:1.6">
+            <strong style="color:var(--text)">How to adjust:</strong> Go to <strong>Settings → Heartbeat</strong> to change the interval for any phase. Lower = more beats = more API cost. The agent can also adjust its own heartbeat dynamically using the <code style="font-family:'IBM Plex Mono',monospace;background:var(--bg-dark);padding:1px 5px;border-radius:3px">set_heartbeat</code> tool — for example speeding up during volatile periods.
+          </div>
         </div>
 
-        <!-- Also By -->
+        <!-- User Manual -->
         <div style="margin-bottom:32px">
-          <h3 style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--ink-muted);margin-bottom:16px">Also by Jake</h3>
+          <h3 style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--ink-muted);margin-bottom:16px">User Manual</h3>
 
-          <!-- Cartogopher -->
-          <a href="https://cartogopher.com" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:16px;padding:20px;background:var(--bg-dark);border:1px solid var(--border);border-radius:8px;text-decoration:none;margin-bottom:12px;transition:border-color 0.2s,transform 0.15s" onmouseover="this.style.borderColor='#7B68EE';this.style.transform='translateY(-1px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform=''">
-            <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#4A90E2,#7B68EE);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-              <span style="font-size:22px;color:#fff;font-weight:800;font-family:'Crimson Pro',Georgia,serif">CG</span>
+          <!-- Starting -->
+          <div style="margin-bottom:18px">
+            <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border)">Starting & Stopping</div>
+            <div style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--ink-muted);line-height:1.6">
+              <div>▸ Press <strong style="color:var(--text)">Start</strong> in the top bar to begin the heartbeat loop. The agent will fire its first beat within seconds.</div>
+              <div>▸ Press <strong style="color:var(--text)">Stop</strong> to halt. Any in-progress beat is killed immediately. Open positions remain open on Alpaca.</div>
+              <div>▸ Press <strong style="color:var(--text)">Pause</strong> to suspend the heartbeat without killing the current beat. Resume resumes from where it left off.</div>
+              <div>▸ The agent remembers its session across beats — context from earlier beats is carried forward automatically.</div>
             </div>
-            <div style="flex:1">
-              <div style="font-size:16px;font-weight:600;color:var(--text)">CartoGopher</div>
-              <div style="font-size:13px;color:var(--ink-muted);margin-top:2px">AI-powered codebase intelligence. Understand any codebase instantly with 99% token reduction. Maps architecture, dependencies, and code flow for AI agents.</div>
-              <div style="font-size:11px;color:var(--accent);margin-top:6px">cartogopher.com &rarr;</div>
-            </div>
-          </a>
+          </div>
 
-          <!-- AnyRentCloud -->
-          <a href="https://anyrentcloud.com" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:16px;padding:20px;background:var(--bg-dark);border:1px solid var(--border);border-radius:8px;text-decoration:none;margin-bottom:12px;transition:border-color 0.2s,transform 0.15s" onmouseover="this.style.borderColor='#22c55e';this.style.transform='translateY(-1px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform=''">
-            <img src="img/anyrentcloud.png" alt="AnyRentCloud" style="width:48px;height:48px;border-radius:12px;object-fit:contain;flex-shrink:0;background:#fff;padding:4px">
-            <div style="flex:1">
-              <div style="font-size:16px;font-weight:600;color:var(--text)">AnyRentCloud</div>
-              <div style="font-size:13px;color:var(--ink-muted);margin-top:2px">AI-powered property management platform. Automates tenant communication, maintenance tickets, lease management, and financials with agentic AI workers.</div>
-              <div style="font-size:11px;color:#22c55e;margin-top:6px">anyrentcloud.com &rarr;</div>
+          <!-- Sending Messages -->
+          <div style="margin-bottom:18px">
+            <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border)">Sending Messages to the Agent</div>
+            <div style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--ink-muted);line-height:1.6">
+              <div>▸ Type in the <strong style="color:var(--text)">Terminal chat bar</strong> at the bottom and press Enter to send a message mid-beat.</div>
+              <div>▸ If the agent is mid-beat, it will be interrupted, your message delivered, and it resumes on the same session.</div>
+              <div>▸ If idle, your message triggers an immediate ad-hoc beat before the next scheduled one.</div>
+              <div>▸ Example: <em>"Don't trade today, markets are too volatile"</em> or <em>"Check if our NVDA position is still valid"</em></div>
             </div>
-          </a>
+          </div>
+
+          <!-- Manager -->
+          <div style="margin-bottom:18px">
+            <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border)">Using the Manager</div>
+            <div style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--ink-muted);line-height:1.6">
+              <div>▸ The <strong style="color:var(--text)">Manager tab</strong> is a separate AI that does NOT trade. Use it for research, analysis, and configuration.</div>
+              <div>▸ Ask it to research a ticker: <em>"Research NVDA — what's the setup today?"</em></div>
+              <div>▸ Ask it to update strategy: <em>"Add crude oil ETFs to the instrument universe"</em></div>
+              <div>▸ Ask it to explain: <em>"Why did the agent skip the XOM trade?"</em></div>
+              <div>▸ The Manager has access to all the same market data tools as the trading agent.</div>
+            </div>
+          </div>
+
+          <!-- Strategy Rules -->
+          <div style="margin-bottom:18px">
+            <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border)">Changing Strategy Rules</div>
+            <div style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--ink-muted);line-height:1.6">
+              <div>▸ Go to <strong style="color:var(--text)">Strategies tab</strong> and edit <strong>TRADING_RULES.md</strong> directly — or ask the Manager to update it for you.</div>
+              <div>▸ Changes take effect on the next beat. No restart needed.</div>
+              <div>▸ The rules control: what to trade, when to enter, how to size, when to exit.</div>
+              <div>▸ Keep rules specific and actionable — vague rules lead to vague behavior.</div>
+            </div>
+          </div>
+
+          <!-- Permissions -->
+          <div style="margin-bottom:18px">
+            <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border)">Permissions & Guardrails</div>
+            <div style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--ink-muted);line-height:1.6">
+              <div>▸ <strong style="color:var(--text)">Settings → Permissions</strong> — hard guardrails enforced at the MCP level, before Claude even decides.</div>
+              <div>▸ <strong>Allow Live Trading</strong> — master switch. Off = agent can analyze but never place orders.</div>
+              <div>▸ <strong>Allow Options / Stocks</strong> — asset class switches. Disable stocks to force options-only.</div>
+              <div>▸ <strong>Max Order Value</strong> — cap the dollar value of any single order. Set to 0 for unlimited.</div>
+              <div>▸ <strong>Max Daily Loss %</strong> — if portfolio drops this % intraday, agent auto-pauses. Circuit breaker.</div>
+              <div>▸ <strong>Require Confirmation</strong> — blocks all orders with an error message, so you can review before enabling.</div>
+            </div>
+          </div>
+
+          <!-- Viewing Results -->
+          <div style="margin-bottom:18px">
+            <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border)">Viewing Results & Logs</div>
+            <div style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--ink-muted);line-height:1.6">
+              <div>▸ <strong style="color:var(--text)">Terminal tab</strong> — full real-time log of every beat, tool call, and decision.</div>
+              <div>▸ <strong style="color:var(--text)">Trades tab</strong> — every order the agent placed, with symbol, side, and price.</div>
+              <div>▸ <strong style="color:var(--text)">Portfolio tab</strong> — live Alpaca account: balance, open positions, buying power.</div>
+              <div>▸ <strong>activity_logs/</strong> folder — daily markdown journals the agent writes itself after each session.</div>
+              <div>▸ <strong>decisive_actions/</strong> folder — detailed logs of every trade entry and exit with full reasoning.</div>
+            </div>
+          </div>
+
+          <!-- Tips -->
+          <div style="margin-bottom:4px">
+            <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border)">Tips</div>
+            <div style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--ink-muted);line-height:1.6">
+              <div>▸ Start with paper trading. Watch 2-3 sessions before enabling live funds.</div>
+              <div>▸ The agent is most useful during <strong style="color:var(--text)">Market Open (9:30–10:30 AM ET)</strong> — that's when it finds the most setups.</div>
+              <div>▸ Use the Manager every morning to get a session watchlist before starting the agent.</div>
+              <div>▸ If the agent is overtrading, reduce <strong>Max Tool Rounds Per Beat</strong> in Settings or tighten the entry filters in TRADING_RULES.md.</div>
+              <div>▸ If the agent is undertrading (too passive), ask it via Terminal chat: <em>"Be more aggressive today, look for setups actively."</em></div>
+              <div>▸ Check <strong>decisive_actions/</strong> weekly to review what the agent did and why — this is your feedback loop.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dashboard Guide -->
+        <div style="margin-bottom:28px">
+          <h3 style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--ink-muted);margin-bottom:16px">Dashboard Tabs</h3>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;gap:12px;padding:10px 14px;background:var(--bg-dark);border:1px solid var(--border);border-radius:6px;font-size:12px">
+              <span style="font-weight:700;color:var(--accent);min-width:90px">Terminal</span>
+              <span style="color:var(--ink-muted)">Live stream of everything Claude says and does each beat. Search and filter logs by type.</span>
+            </div>
+            <div style="display:flex;gap:12px;padding:10px 14px;background:var(--bg-dark);border:1px solid var(--border);border-radius:6px;font-size:12px">
+              <span style="font-weight:700;color:var(--accent);min-width:90px">Trades</span>
+              <span style="color:var(--ink-muted)">History of all orders placed — symbol, side, price, quantity, timestamp.</span>
+            </div>
+            <div style="display:flex;gap:12px;padding:10px 14px;background:var(--bg-dark);border:1px solid var(--border);border-radius:6px;font-size:12px">
+              <span style="font-weight:700;color:var(--accent);min-width:90px">Portfolio</span>
+              <span style="color:var(--ink-muted)">Live Alpaca account — balance, open positions, buying power, P&L.</span>
+            </div>
+            <div style="display:flex;gap:12px;padding:10px 14px;background:var(--bg-dark);border:1px solid var(--border);border-radius:6px;font-size:12px">
+              <span style="font-weight:700;color:var(--accent);min-width:90px">Manager</span>
+              <span style="color:var(--ink-muted)">Chat with a separate AI for research, analysis, and configuration. Does not trade.</span>
+            </div>
+            <div style="display:flex;gap:12px;padding:10px 14px;background:var(--bg-dark);border:1px solid var(--border);border-radius:6px;font-size:12px">
+              <span style="font-weight:700;color:var(--accent);min-width:90px">Agents</span>
+              <span style="color:var(--ink-muted)">Manage AI personas — each has its own strategy, model, and heartbeat schedule.</span>
+            </div>
+            <div style="display:flex;gap:12px;padding:10px 14px;background:var(--bg-dark);border:1px solid var(--border);border-radius:6px;font-size:12px">
+              <span style="font-weight:700;color:var(--accent);min-width:90px">Strategies</span>
+              <span style="color:var(--ink-muted)">Edit TRADING_RULES.md — instruments, sizing, stops, entry criteria, macro bias.</span>
+            </div>
+            <div style="display:flex;gap:12px;padding:10px 14px;background:var(--bg-dark);border:1px solid var(--border);border-radius:6px;font-size:12px">
+              <span style="font-weight:700;color:var(--accent);min-width:90px">Settings</span>
+              <span style="color:var(--ink-muted)">Heartbeat intervals, permissions/guardrails, model selection, auth token, Slack alerts.</span>
+            </div>
+            <div style="display:flex;gap:12px;padding:10px 14px;background:var(--bg-dark);border:1px solid var(--border);border-radius:6px;font-size:12px">
+              <span style="font-weight:700;color:var(--accent);min-width:90px">About</span>
+              <span style="color:var(--ink-muted)">This page — system overview, heartbeat schedule, user manual.</span>
+            </div>
+          </div>
         </div>
 
         <!-- Tech Stack -->
-        <div style="margin-bottom:32px">
+        <div style="margin-bottom:28px">
           <h3 style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--ink-muted);margin-bottom:16px">Tech Stack</h3>
           <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));gap:8px">
             <div style="padding:10px 14px;background:var(--bg-dark);border:1px solid var(--border);border-radius:6px;font-size:12px">
-              <div style="font-weight:600;color:var(--text)">Claude</div>
-              <div style="color:var(--ink-faint);font-size:11px">AI Agent Brain</div>
+              <div style="font-weight:600;color:var(--text)">Claude</div><div style="color:var(--ink-faint);font-size:11px">AI Agent Brain</div>
             </div>
             <div style="padding:10px 14px;background:var(--bg-dark);border:1px solid var(--border);border-radius:6px;font-size:12px">
-              <div style="font-weight:600;color:var(--text)">OpenCode</div>
-              <div style="color:var(--ink-faint);font-size:11px">Agent Runtime</div>
+              <div style="font-weight:600;color:var(--text)">OpenCode</div><div style="color:var(--ink-faint);font-size:11px">Agent Runtime</div>
             </div>
             <div style="padding:10px 14px;background:var(--bg-dark);border:1px solid var(--border);border-radius:6px;font-size:12px">
-              <div style="font-weight:600;color:var(--text)">Go</div>
-              <div style="color:var(--ink-faint);font-size:11px">Trading Backend</div>
+              <div style="font-weight:600;color:var(--text)">Go + Gin</div><div style="color:var(--ink-faint);font-size:11px">Trading Backend</div>
             </div>
             <div style="padding:10px 14px;background:var(--bg-dark);border:1px solid var(--border);border-radius:6px;font-size:12px">
-              <div style="font-weight:600;color:var(--text)">Node.js</div>
-              <div style="color:var(--ink-faint);font-size:11px">Agent Orchestrator</div>
+              <div style="font-weight:600;color:var(--text)">Node.js</div><div style="color:var(--ink-faint);font-size:11px">Orchestrator + Dashboard</div>
             </div>
             <div style="padding:10px 14px;background:var(--bg-dark);border:1px solid var(--border);border-radius:6px;font-size:12px">
-              <div style="font-weight:600;color:var(--text)">Alpaca</div>
-              <div style="color:var(--ink-faint);font-size:11px">Brokerage API</div>
+              <div style="font-weight:600;color:var(--text)">Alpaca</div><div style="color:var(--ink-faint);font-size:11px">Brokerage API</div>
             </div>
             <div style="padding:10px 14px;background:var(--bg-dark);border:1px solid var(--border);border-radius:6px;font-size:12px">
-              <div style="font-weight:600;color:var(--text)">MCP</div>
-              <div style="color:var(--ink-faint);font-size:11px">Tool Protocol</div>
+              <div style="font-weight:600;color:var(--text)">MCP</div><div style="color:var(--ink-faint);font-size:11px">45+ Trading Tools</div>
             </div>
           </div>
         </div>
 
-        <!-- Links -->
+        <!-- Footer -->
         <div style="text-align:center;padding:20px 0;border-top:1px solid var(--border);font-size:12px;color:var(--ink-faint)">
-          <a href="https://github.com/jakenesler" target="_blank" style="color:var(--accent);text-decoration:none;margin:0 8px">GitHub</a>
-          &middot;
-          <a href="https://github.com/jakenesler/openprophet" target="_blank" style="color:var(--accent);text-decoration:none;margin:0 8px">Source Code</a>
-          &middot;
-          <a href="https://buymeacoffee.com/jakenesleri" target="_blank" style="color:var(--accent);text-decoration:none;margin:0 8px">Support</a>
-          <div style="margin-top:8px;color:var(--ink-faint)">&copy; 2025-2026 Jake Nesler. All rights reserved.</div>
+          <div>OpenProphet &mdash; open source, self-hosted</div>
+          <div style="margin-top:6px">
+            <a href="https://github.com/JakeNesler/OpenProphet" target="_blank" style="color:var(--accent);text-decoration:none;margin:0 8px">GitHub</a>
+          </div>
         </div>
 
       </div>
@@ -1130,10 +1258,21 @@ function connectSSE() {
   if (_sseReconnectTimer) { clearTimeout(_sseReconnectTimer); _sseReconnectTimer = null; }
   const es = new EventSource(withAuthUrl('/api/events'));
   _eventSource = es;
-  es.onopen = () => { 
+  es.onopen = () => {
     _sseReconnectAttempts = 0;
-    document.getElementById('sse-status').textContent = 'ok'; 
-    document.getElementById('sse-status').style.color = 'var(--success)'; 
+    document.getElementById('sse-status').textContent = 'ok';
+    document.getElementById('sse-status').style.color = 'var(--success)';
+    // Ensure manager terminal exists so SSE events aren't dropped before tab is clicked
+    ensureManagerTerminal();
+    // If manager was thinking when SSE dropped, reset it — events were lost during disconnect
+    if (_managerThinking) {
+      _managerThinking = false;
+      const input = document.getElementById('manager-chat-input');
+      if (input) { input.disabled = false; input.placeholder = 'Ask the manager to create agents, strategies, research...'; }
+      const thinkEl = document.getElementById('manager-thinking');
+      if (thinkEl) thinkEl.remove();
+      logToSandbox('_manager', '<div class="log-entry warning"><span class="time">' + fmtTime() + '</span>Connection reset — response may have been lost. Please resend.</div>');
+    }
   };
   es.onerror = () => { 
     document.getElementById('sse-status').textContent = 'reconnecting'; 
@@ -1250,6 +1389,7 @@ function connectSSE() {
   });
   es.addEventListener('manager_done', e => {
     _managerThinking = false;
+    if (window._managerTimeoutId) { clearTimeout(window._managerTimeoutId); window._managerTimeoutId = null; }
     const input = document.getElementById('manager-chat-input');
     if (input) { input.disabled = false; input.placeholder = 'Ask the manager to create agents, strategies, research...'; input.focus(); }
     const thinkEl = document.getElementById('manager-thinking');
@@ -1870,6 +2010,17 @@ async function sendManagerMessage() {
   // Disable input while thinking
   input.disabled = true;
   input.placeholder = 'Manager is thinking...';
+  // Safety timeout — reset if no response in 120s
+  if (window._managerTimeoutId) clearTimeout(window._managerTimeoutId);
+  window._managerTimeoutId = setTimeout(() => {
+    if (_managerThinking) {
+      _managerThinking = false;
+      if (input) { input.disabled = false; input.placeholder = 'Ask the manager to create agents, strategies, research...'; }
+      const thinkEl = document.getElementById('manager-thinking');
+      if (thinkEl) thinkEl.remove();
+      logToSandbox('_manager', '<div class="log-entry warning"><span class="time">' + fmtTime() + '</span>No response after 120s — timed out. Try again.</div>');
+    }
+  }, 120000);
   try {
     const r = await fetch('/api/manager/message', {
       method: 'POST',

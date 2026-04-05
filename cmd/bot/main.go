@@ -40,7 +40,7 @@ func main() {
 
 	// Validate required configuration
 	if cfg.AlpacaAPIKey == "" || cfg.AlpacaSecretKey == "" {
-		logger.Fatal("Alpaca API credentials not configured. Please set ALPACA_API_KEY and ALPACA_SECRET_KEY")
+		logger.Warn("Alpaca API credentials not configured — trading disabled, news/research endpoints still available")
 	}
 
 	// Initialize services
@@ -221,6 +221,11 @@ func setupRouter(orderController *controllers.OrderController, newsController *c
 		api.GET("/intelligence/quick-market", intelligenceController.HandleGetQuickMarketIntelligence)
 		api.GET("/intelligence/analyze/:symbol", intelligenceController.HandleAnalyzeStock)
 		api.POST("/intelligence/analyze-multiple", intelligenceController.HandleAnalyzeMultipleStocks)
+
+		// Saudi market research (research only, no execution)
+		api.GET("/intelligence/saudi-news", intelligenceController.HandleGetSaudiNews)
+		api.GET("/intelligence/saudi-market", intelligenceController.HandleGetSaudiMarketIntelligence)
+		api.GET("/intelligence/saudi-technicals/:symbol", intelligenceController.HandleGetSaudiTechnicals)
 
 		// Position management endpoints
 		api.POST("/positions/managed", positionController.HandlePlaceManagedPosition)

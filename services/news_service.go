@@ -38,10 +38,10 @@ func (n *NewsItem) ToCompact() NewsItemCompact {
 
 // NewsChannel represents the RSS channel
 type NewsChannel struct {
-	Title       string      `xml:"title"`
-	Link        string      `xml:"link"`
-	Description string      `xml:"description"`
-	Items       []NewsItem  `xml:"item"`
+	Title       string     `xml:"title"`
+	Link        string     `xml:"link"`
+	Description string     `xml:"description"`
+	Items       []NewsItem `xml:"item"`
 }
 
 // RSSFeed represents the root RSS structure
@@ -149,6 +149,36 @@ func (ns *NewsService) GetAllMarketWatchNews() ([]NewsItem, error) {
 	return allNews, nil
 }
 
+// GetSaudiNewsFromGoogle fetches Saudi market news via Google News RSS search
+// Uses Google's open RSS endpoint which doesn't require auth or block scrapers
+func (ns *NewsService) GetSaudiNewsFromGoogle() ([]NewsItem, error) {
+	queries := []string{"Saudi Arabia Tadawul stocks", "Saudi Arabia oil economy", "Aramco SABIC"}
+	allNews := make([]NewsItem, 0)
+	for _, q := range queries {
+		items, err := ns.GetGoogleNewsSearch(q)
+		if err != nil {
+			continue
+		}
+		for i := range items {
+			if items[i].Source == "" {
+				items[i].Source = "Google News"
+			}
+		}
+		limit := 8
+		if len(items) < limit {
+			limit = len(items)
+		}
+		allNews = append(allNews, items[:limit]...)
+	}
+	return allNews, nil
+}
+
+// GetAllSaudiNews returns Saudi market news from Google News RSS
+// (Argaam and Arab News direct feeds are blocked by Cloudflare)
+func (ns *NewsService) GetAllSaudiNews() ([]NewsItem, error) {
+	return ns.GetSaudiNewsFromGoogle()
+}
+
 // fetchRSSFeed is a helper method to fetch and parse any RSS feed
 func (ns *NewsService) fetchRSSFeed(url string) ([]NewsItem, error) {
 	// Make HTTP request
@@ -226,8 +256,8 @@ func (ns *NewsService) FilterNewsByKeywords(items []NewsItem, keywords []string)
 func contains(s, substr string) bool {
 	return len(s) >= len(substr) && (s == substr ||
 		len(s) > len(substr) && (s[:len(substr)] == substr ||
-		s[len(s)-len(substr):] == substr ||
-		findSubstring(s, substr)))
+			s[len(s)-len(substr):] == substr ||
+			findSubstring(s, substr)))
 }
 
 func findSubstring(s, substr string) bool {

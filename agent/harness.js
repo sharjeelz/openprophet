@@ -5,6 +5,39 @@ import { EventEmitter } from 'events';
 import fs from 'fs/promises';
 import path from 'path';
 
+// On Windows, npm CLI tools are .cmd files that require shell:true to spawn
+const OPENCODE_BIN = 'opencode';
+const OPENCODE_SHELL = process.platform === 'win32';
+
+// ── Telegram Notifications ─────────────────────────────────────────
+async function sendSaudiTelegramSignal(symbol, action, thesis, price) {
+  const priceStr = price ? `\nPrice: SAR ${price}` : '';
+  const text = `🇸🇦 <b>SAUDI SIGNAL</b>\n\n<b>${action}</b> ${symbol}${priceStr}\n\n<b>Thesis:</b> ${thesis}\n\n<i>RESEARCH ONLY — No execution</i>`;
+  await sendTelegramSignal(text);
+}
+
+async function sendTelegramSignal(text) {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+  if (!token || !chatId) return;
+  try {
+    const url = `https://api.telegram.org/bot${token}/sendMessage`;
+    const { default: https } = await import('https');
+    const body = JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML' });
+    await new Promise((resolve, reject) => {
+      const req = https.request(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) } }, (res) => {
+        res.resume();
+        res.on('end', resolve);
+      });
+      req.on('error', reject);
+      req.write(body);
+      req.end();
+    });
+  } catch (err) {
+    console.error('[telegram] Failed to send signal:', err.message);
+  }
+}
+
 // Default max tool rounds; overridden by permissions config at runtime
 
 // ── Phase Configuration ────────────────────────────────────────────
@@ -30,8 +63,24 @@ export function getCurrentPhase() {
   return 'closed';
 }
 
+// Saudi market phase detection (Tadawul: Sun–Thu, 10:00–15:00 AST = 07:00–12:00 UTC)
+export function getSaudiPhase() {
+  const now = new Date();
+  // Get both time and weekday in Riyadh timezone
+  const riyadhDate = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Riyadh' }));
+  const h = riyadhDate.getHours();
+  const m = riyadhDate.getMinutes();
+  const day = riyadhDate.getDay(); // 0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat
+  const mins = h * 60 + m;
+  if (day === 5 || day === 6) return 'saudi_closed'; // Fri/Sat
+  if (mins >= 570 && mins < 600) return 'saudi_pre_market'; // 9:30–10:00 AST
+  if (mins >= 600 && mins < 900) return 'saudi_open';       // 10:00–15:00 AST
+  return 'saudi_closed';
+}
+
 // ── System Prompt Builder ──────────────────────────────────────────
 export async function buildSystemPrompt(agentConfig, options = {}) {
+  if (!agentConfig) agentConfig = {};
   const { getStrategyById = () => null } = options;
   let strategyRules = '';
   if (agentConfig.customStrategyRules) {
@@ -70,6 +119,7 @@ export async function buildSystemPrompt(agentConfig, options = {}) {
 **Options**: place_options_order, get_options_positions, get_options_position, get_options_chain
 **Market Data**: get_quote, get_latest_bar, get_historical_bars, analyze_stocks
 **News**: get_news, search_news, get_market_news, get_quick_market_intelligence, get_cleaned_news, get_marketwatch_topstories
+**Saudi Research**: get_saudi_news, get_saudi_market_intelligence (use when Tadawul is open: Sun–Thu 10:00–15:00 AST)
 **Agent Config**: update_agent_prompt, update_strategy_rules, get_agent_config, set_heartbeat, update_permissions, set_session_mode, create_agent, create_strategy, assign_agent_to_sandbox
 **Heartbeat**: get_heartbeat_profiles, apply_heartbeat_profile, get_heartbeat_phases, update_heartbeat_phase
 **Logging**: log_decision, log_activity, get_activity_log
@@ -97,12 +147,13 @@ Heartbeat control:
 
 ## Operational Rules
 - Be decisive. Analyze and act.
-- Don't waste heartbeats on excessive analysis.
-- If nothing to do, say so briefly.
+- Always narrate what you are doing as you do it — before each tool call, write 1 line explaining what you're checking and why.
+- After each key finding (news, quote, chain), write a brief observation so the operator can follow your reasoning.
+- Always end each beat with a plain-English summary: what you checked, what you found, what you did or decided, and what to watch next.
 - Always log trade reasoning with log_decision.
 - NEVER ask the user questions. You are autonomous.
 - If you need information, use your tools.
-- Each heartbeat is independent - gather data, decide, act, summarize.`;
+- If nothing to trade, explain why (no setup, waiting for confirmation, etc.) — never just go silent.`;
 
   return `${identity}\n\n${rulesBlock}\n\n${systemInstructions}`;
 }
@@ -113,8 +164,8 @@ export function checkCliAuth() {
   if (process.env.ANTHROPIC_API_KEY) return true;
   try {
     const out = execSync('opencode auth list 2>&1', { timeout: 5000, encoding: 'utf-8' });
-    // Look for Anthropic credential (oauth or env) in the output
-    return out.includes('Anthropic');
+    // Accept any valid credential (Anthropic, OpenCode Zen, OpenAI, etc.)
+    return out.includes('credential') || out.includes('oauth') || out.includes('api') || out.includes('Anthropic');
   } catch {
     return false;
   }
@@ -489,7 +540,8 @@ The user/operator is sending you a direct message. Read it carefully and respond
 **Trading**: get_account, get_positions, get_orders, place_buy_order, place_sell_order, place_managed_position, get_managed_positions, close_managed_position, cancel_order
 **Options**: place_options_order, get_options_positions, get_options_position, get_options_chain
 **Market Data**: get_quote, get_latest_bar, get_historical_bars, analyze_stocks
-**News**: get_news, search_news, get_market_news, get_quick_market_intelligence, get_cleaned_news, get_marketwatch_topstories, get_marketwatch_realtime
+**News**: get_news, search_news, get_market_news, get_quick_market_intelligence, get_cleaned_news, get_marketwatch_topstories
+**Saudi Research**: get_saudi_news, get_saudi_market_intelligence (use when Tadawul is open: Sun–Thu 10:00–15:00 AST), get_marketwatch_realtime
 **Intelligence**: aggregate_and_summarize_news, list_news_summaries, get_news_summary
 **Agent Config**: update_agent_prompt, update_strategy_rules, get_agent_config, set_heartbeat, update_permissions, set_session_mode, create_agent, create_strategy, assign_agent_to_sandbox
 **Heartbeat**: get_heartbeat_profiles, apply_heartbeat_profile, get_heartbeat_phases, update_heartbeat_phase
@@ -572,7 +624,16 @@ ${userBlock}`;
     this.state.lastBeatTime = new Date().toISOString();
     const phase = this.getCurrentPhaseFn();
     this.state.phase = phase;
-    const model = this.state.activeModel;
+    // Phase-aware model: Sonnet for active trading phases, Haiku for monitoring phases.
+    const PHASE_MODELS = {
+      market_open:  'anthropic/claude-sonnet-4-6',
+      market_close: 'anthropic/claude-sonnet-4-6',
+      pre_market:   'anthropic/claude-haiku-4-5-20251001',
+      midday:       'anthropic/claude-haiku-4-5-20251001',
+      after_hours:  'anthropic/claude-haiku-4-5-20251001',
+      closed:       'anthropic/claude-haiku-4-5-20251001',
+    };
+    const model = PHASE_MODELS[phase] ?? this.state.activeModel;
 
     this.state.emit('beat_start', { beat: beatNum, phase, time: this.state.lastBeatTime });
     this.state.emit('agent_log', {
@@ -595,7 +656,12 @@ ${userBlock}`;
     if (perms.blockedTools?.length) permLines.push(`Blocked tools (do NOT call): ${perms.blockedTools.join(', ')}.`);
     const permStr = permLines.length ? '\n\nGUARDRAILS:\n' + permLines.join('\n') : '';
 
-    const prompt = `[HEARTBEAT #${beatNum}] Phase: ${PHASE_DEFAULTS[phase].label}. Time: ${new Date().toLocaleString('en-US', { timeZone: 'America/New_York' })} ET. Current heartbeat interval: ${this.state.heartbeatSeconds}s.${permStr}\n\nPerform your duties for this phase.`;
+    const saudiPhase = getSaudiPhase();
+    const saudiContext = saudiPhase !== 'saudi_closed'
+      ? `\nSaudi Tadawul: ${saudiPhase === 'saudi_open' ? 'OPEN' : 'PRE-MARKET'} — call get_saudi_market_intelligence for Saudi research signals. Log signals with log_decision using .SR ticker symbols.`
+      : '';
+
+    const prompt = `[HEARTBEAT #${beatNum}] Phase: ${PHASE_DEFAULTS[phase].label}. Time: ${new Date().toLocaleString('en-US', { timeZone: 'America/New_York' })} ET. Current heartbeat interval: ${this.state.heartbeatSeconds}s.${permStr}${saudiContext}\n\nPerform your duties for this phase.`;
 
     try {
       const result = await this._runClaude(prompt, model);
@@ -668,8 +734,9 @@ ${userBlock}`;
         });
       }
 
-      const proc = spawn('opencode', args, {
+      const proc = spawn(OPENCODE_BIN, args, {
         cwd: process.cwd(),
+        shell: OPENCODE_SHELL,
         env: {
           ...process.env,
           ...this.opencodeEnv,
@@ -831,16 +898,49 @@ ${userBlock}`;
         this.state.emit('tool_result', { name: toolName, result: resultStr.substring(0, 500), beat: beatNum });
 
         // Track trades
-        if (fullToolName.includes('buy') || fullToolName.includes('sell') || fullToolName.includes('order') || fullToolName.includes('managed')) {
+        const ORDER_TOOL_PATTERNS = ['place_buy_order', 'place_sell_order', 'place_options_order', 'place_managed_position', 'close_managed_position', 'cancel_order'];
+        if (ORDER_TOOL_PATTERNS.some(p => fullToolName.includes(p))) {
           this.state.stats.trades++;
+          // For options, prefer underlying ticker; OCC symbol contains it as leading letters
+          const rawSymbol = toolInput.underlying || toolInput.symbol || '';
+          const symbol = rawSymbol.match(/^[A-Z]+/)?.[0] || rawSymbol || '??';
+          const side = toolInput.side || (fullToolName.includes('buy') ? 'buy' : 'sell');
+          const qty = toolInput.quantity || toolInput.qty || '?';
+          const price = toolInput.limit_price ? ` @ $${toolInput.limit_price}` : '';
+          const contract = toolInput.symbol || toolInput.underlying || symbol;
+          const action = fullToolName.includes('close') ? 'CLOSE' : side.toUpperCase();
+          const isOption = fullToolName.includes('options');
+          const typeLabel = isOption ? 'OPTIONS' : 'EQUITY';
+          const beat = beatNum;
+          const now = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZone: 'America/New_York' });
+
           this.state.addTrade({
             type: 'order',
             tool: toolName,
-            symbol: toolInput.symbol || '??',
-            side: toolInput.side || (fullToolName.includes('buy') ? 'buy' : 'sell'),
-            quantity: toolInput.quantity || toolInput.qty,
+            symbol,
+            side,
+            quantity: qty,
             price: toolInput.limit_price,
           });
+
+          // Fire Telegram signal
+          const msg = `<b>OpenProphet Signal</b>\n` +
+            `${symbol} • ${action} ${typeLabel}\n` +
+            `Contract: <code>${contract}</code>\n` +
+            `Size: ${qty} contract${qty !== 1 ? 's' : ''}${price}\n` +
+            `Beat #${beat} • ${now} ET`;
+          sendTelegramSignal(msg);
+        }
+
+        // Saudi signal detection — fire Telegram when log_decision is called with a .SR or KSA symbol
+        if (toolName.includes('log_decision')) {
+          const sym = toolInput.symbol || '';
+          if (sym.endsWith('.SR') || sym === 'KSA') {
+            const action = toolInput.action || toolInput.decision || 'SIGNAL';
+            const thesis = toolInput.reasoning || toolInput.rationale || toolInput.notes || '';
+            const price = toolInput.market_data?.price || toolInput.price || null;
+            sendSaudiTelegramSignal(sym, action, thesis, price);
+          }
         }
         break;
       }

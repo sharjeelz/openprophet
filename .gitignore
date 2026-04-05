@@ -40,4 +40,6 @@ node_modules/
 
 # News summary cache
 news_summaries/*.json
-quickstart.sh
+quickstart.sh.env
+prophet_bot.exe
+prophet_bot

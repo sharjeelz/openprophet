@@ -1,0 +1,23 @@
+services:
+  openprophet:
+    build: .
+    container_name: openprophet
+    restart: unless-stopped
+    ports:
+      - "3737:3737"
+    env_file:
+      - .env
+    volumes:
+      # Persist data (agent config, databases, activity logs)
+      - ./data:/app/data
+      # Persist trading rules (edit on host, reloaded each beat)
+      - ./TRADING_RULES.md:/app/TRADING_RULES.md
+      # OpenCode auth (credentials from your local opencode login)
+      - opencode-auth:/root/.local/share/opencode
+    environment:
+      - NODE_ENV=production
+      - TRADING_BOT_URL=http://localhost:4534
+
+volumes:
+  # Named volume for OpenCode auth — populated during setup (see README)
+  opencode-auth:

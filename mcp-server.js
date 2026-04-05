@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import 'dotenv/config';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import {
@@ -551,6 +552,33 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           type: 'object',
           properties: {},
         },
+      },
+      {
+        name: 'get_saudi_news',
+        description: 'Get latest news from Saudi financial sources (Argaam English + Arab News Business). Use during Saudi market hours (Sun–Thu 07:00–12:00 UTC / 10:00 AM–3:00 PM AST) for Tadawul research.',
+        inputSchema: { type: 'object', properties: {} },
+      },
+      {
+        name: 'get_saudi_market_intelligence',
+        description: 'Get AI-powered Saudi market intelligence: live Refinitiv quotes + Twelve Data technical indicators (RSI, MACD, EMA, BBands) for top Tadawul stocks plus Gemini-analyzed Saudi news. Returns directional signals for research — no orders placed.',
+        inputSchema: { type: 'object', properties: {} },
+      },
+      {
+        name: 'get_saudi_technicals',
+        description: 'Get technical indicators (RSI, MACD, EMA20, EMA50, Bollinger Bands, ATR) for a specific Saudi stock from Twelve Data. symbol: bare number like "2222". interval: "1h" (default) or "1day".',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            symbol: { type: 'string', description: 'Saudi stock number e.g. "2222" for Aramco' },
+            interval: { type: 'string', description: '1h or 1day', default: '1h' },
+          },
+          required: ['symbol'],
+        },
+      },
+      {
+        name: 'get_market_status',
+        description: 'Returns current market open/closed status for US (NYSE/NASDAQ) and Saudi Arabia (Tadawul). Always use this instead of external datetime APIs which use Western calendar conventions and incorrectly flag Sunday as a non-trading day. Tadawul trades Sunday–Thursday.',
+        inputSchema: { type: 'object', properties: {} },
       },
       {
         name: 'analyze_stocks',
@@ -1617,6 +1645,74 @@ ${allNews.map((article, i) =>
               text: JSON.stringify(data, null, 2),
             },
           ],
+        };
+      }
+
+      case 'get_saudi_news': {
+        const data = await callTradingBot('/intelligence/saudi-news');
+        return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
+      }
+
+      case 'get_saudi_market_intelligence': {
+        const data = await callTradingBot('/intelligence/saudi-market');
+        return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
+      }
+
+      case 'get_saudi_technicals': {
+        const sym = args.symbol || '2222';
+        const interval = args.interval || '1h';
+        const data = await callTradingBot(`/intelligence/saudi-technicals/${sym}?interval=${interval}`);
+        return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
+      }
+
+      case 'get_market_status': {
+        const now = new Date();
+        // US market (ET)
+        const etStr = now.toLocaleString('en-US', { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit', hour12: false, weekday: 'long' });
+        const etParts = etStr.match(/(\w+),\s+(\d+):(\d+)/);
+        const etDay = etParts ? etParts[1] : '';
+        const etH = etParts ? parseInt(etParts[2]) : 0;
+        const etM = etParts ? parseInt(etParts[3]) : 0;
+        const etMins = etH * 60 + etM;
+        const usWeekday = !['Saturday', 'Sunday'].includes(etDay);
+        const usOpen = usWeekday && etMins >= 570 && etMins < 960; // 9:30–16:00
+
+        // Saudi market (Riyadh)
+        const riyStr = now.toLocaleString('en-US', { timeZone: 'Asia/Riyadh', hour: '2-digit', minute: '2-digit', hour12: false, weekday: 'long' });
+        const riyParts = riyStr.match(/(\w+),\s+(\d+):(\d+)/);
+        const riyDay = riyParts ? riyParts[1] : '';
+        const riyH = riyParts ? parseInt(riyParts[2]) : 0;
+        const riyM = riyParts ? parseInt(riyParts[3]) : 0;
+        const riyMins = riyH * 60 + riyM;
+        // Tadawul: Sun–Thu (NOT Fri/Sat), 10:00–15:00 AST
+        const saudiWeekday = !['Friday', 'Saturday'].includes(riyDay);
+        const saudiOpen = saudiWeekday && riyMins >= 600 && riyMins < 900;
+        const saudiPreMarket = saudiWeekday && riyMins >= 570 && riyMins < 600;
+
+        return {
+          content: [{
+            type: 'text',
+            text: JSON.stringify({
+              utc_now: now.toISOString(),
+              us_market: {
+                day_et: etDay,
+                time_et: `${String(etH).padStart(2,'0')}:${String(etM).padStart(2,'0')}`,
+                is_weekday: usWeekday,
+                is_open: usOpen,
+                hours: '09:30–16:00 ET Mon–Fri',
+              },
+              saudi_market: {
+                day_riyadh: riyDay,
+                time_ast: `${String(riyH).padStart(2,'0')}:${String(riyM).padStart(2,'0')}`,
+                is_trading_day: saudiWeekday,
+                is_open: saudiOpen,
+                is_pre_market: saudiPreMarket,
+                trading_days: 'Sunday–Thursday (NOT Mon–Fri)',
+                hours: '10:00–15:00 AST (07:00–12:00 UTC)',
+                note: 'Sunday IS a trading day. Friday and Saturday are the weekend.',
+              },
+            }, null, 2),
+          }],
         };
       }
 
