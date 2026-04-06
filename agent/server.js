@@ -31,15 +31,19 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = path.join(__dirname, '..');
 const PORT = process.env.AGENT_PORT || 3737;
 
-// Write .opencode/config.json so OpenCode loads the prophet_* MCP tools
+// Write OpenCode config so prophet_* MCP tools load — try all known locations
 (async () => {
   try {
-    const dir = path.join(PROJECT_ROOT, '.opencode');
-    await fs.mkdir(dir, { recursive: true });
-    await fs.writeFile(path.join(dir, 'config.json'), JSON.stringify({
+    const mcpPath = path.join(PROJECT_ROOT, 'mcp-server.js').replace(/\\/g, '/');
+    const cfg = JSON.stringify({
       $schema: 'https://opencode.ai/config.json',
-      mcp: { prophet: { type: 'local', command: ['node', path.join(PROJECT_ROOT, 'mcp-server.js').replace(/\\/g, '/')], enabled: true } }
-    }, null, 2));
+      mcp: { prophet: { type: 'local', command: ['node', mcpPath], enabled: true } }
+    }, null, 2);
+    // Project root: opencode.json (primary location for v1.x)
+    await fs.writeFile(path.join(PROJECT_ROOT, 'opencode.json'), cfg);
+    // Also write to .opencode/config.json (alternative location)
+    await fs.mkdir(path.join(PROJECT_ROOT, '.opencode'), { recursive: true });
+    await fs.writeFile(path.join(PROJECT_ROOT, '.opencode', 'config.json'), cfg);
   } catch {}
 })();
 const TRADING_BOT_PORT = process.env.TRADING_BOT_PORT || '4534';
