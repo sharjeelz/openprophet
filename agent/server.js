@@ -30,6 +30,18 @@ import {
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = path.join(__dirname, '..');
 const PORT = process.env.AGENT_PORT || 3737;
+
+// Write .opencode/config.json so OpenCode loads the prophet_* MCP tools
+(async () => {
+  try {
+    const dir = path.join(PROJECT_ROOT, '.opencode');
+    await fs.mkdir(dir, { recursive: true });
+    await fs.writeFile(path.join(dir, 'config.json'), JSON.stringify({
+      $schema: 'https://opencode.ai/config.json',
+      mcp: { prophet: { type: 'local', command: ['node', path.join(PROJECT_ROOT, 'mcp-server.js').replace(/\\/g, '/')], enabled: true } }
+    }, null, 2));
+  } catch {}
+})();
 const TRADING_BOT_PORT = process.env.TRADING_BOT_PORT || '4534';
 const TRADING_BOT_URL = process.env.TRADING_BOT_URL || `http://localhost:${TRADING_BOT_PORT}`;
 

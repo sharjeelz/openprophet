@@ -115,16 +115,16 @@ export async function buildSystemPrompt(agentConfig, options = {}) {
   // Layer 3: System Instructions (tools, heartbeat, operational)
   const systemInstructions = `## Available Tools
 
-**Trading**: get_account, get_positions, get_orders, place_buy_order, place_sell_order, place_managed_position, get_managed_positions, close_managed_position, cancel_order
-**Options**: place_options_order, get_options_positions, get_options_position, get_options_chain
-**Market Data**: get_quote, get_latest_bar, get_historical_bars, analyze_stocks
-**News**: get_news, search_news, get_market_news, get_quick_market_intelligence, get_cleaned_news, get_marketwatch_topstories
-**Saudi Research**: get_saudi_news, get_saudi_market_intelligence (use when Tadawul is open: Sun–Thu 10:00–15:00 AST)
-**Agent Config**: update_agent_prompt, update_strategy_rules, get_agent_config, set_heartbeat, update_permissions, set_session_mode, create_agent, create_strategy, assign_agent_to_sandbox
-**Heartbeat**: get_heartbeat_profiles, apply_heartbeat_profile, get_heartbeat_phases, update_heartbeat_phase
-**Logging**: log_decision, log_activity, get_activity_log
-**Trade History**: find_similar_setups, store_trade_setup, get_trade_stats
-**Utility**: get_datetime, wait
+**Trading**: prophet_get_account, prophet_get_positions, prophet_get_orders, prophet_place_buy_order, prophet_place_sell_order, prophet_place_managed_position, prophet_get_managed_positions, prophet_close_managed_position, prophet_cancel_order
+**Options**: prophet_place_options_order, prophet_get_options_positions, prophet_get_options_position, prophet_get_options_chain
+**Market Data**: prophet_get_quote, prophet_get_latest_bar, prophet_get_historical_bars, prophet_analyze_stocks
+**News**: prophet_get_news, prophet_search_news, prophet_get_market_news, prophet_get_quick_market_intelligence, prophet_get_cleaned_news, prophet_get_marketwatch_topstories
+**Saudi Research**: prophet_get_saudi_news, prophet_get_saudi_market_intelligence (use when Tadawul is open: Sun–Thu 10:00–15:00 AST)
+**Agent Config**: prophet_update_agent_prompt, prophet_update_strategy_rules, prophet_get_agent_config, prophet_set_heartbeat, prophet_update_permissions, prophet_set_session_mode, prophet_create_agent, prophet_create_strategy, prophet_assign_agent_to_sandbox
+**Heartbeat**: prophet_get_heartbeat_profiles, prophet_apply_heartbeat_profile, prophet_get_heartbeat_phases, prophet_update_heartbeat_phase
+**Logging**: prophet_log_decision, prophet_log_activity, prophet_get_activity_log
+**Trade History**: prophet_find_similar_setups, prophet_store_trade_setup, prophet_get_trade_stats
+**Utility**: prophet_get_datetime, prophet_wait
 
 ## Heartbeat Behavior
 
