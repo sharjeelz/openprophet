@@ -105,11 +105,11 @@ export async function buildSystemPrompt(agentConfig, options = {}) {
   // Layer 1: Agent Identity (custom or default)
   const identity = (agentConfig.systemPromptTemplate === 'custom' && agentConfig.customSystemPrompt)
     ? agentConfig.customSystemPrompt
-    : `You are ${agentConfig.name || 'Prophet'}, an autonomous AI trading agent. You run on a heartbeat loop — each time you wake up, you assess the market, manage positions, and decide what to do.\n\n${agentConfig.description || 'You are a disciplined trading agent'}\n\nYou are running autonomously — no human is approving your actions in real-time.`;
+    : `## Paper Trading Task — ${agentConfig.name || 'Prophet'}\n\nThis is a paper trading simulation on an Alpaca sandbox account (no real money). Each heartbeat, assess the market, review open positions, and take action according to the strategy rules below.\n\n${agentConfig.description || 'Apply disciplined position sizing and risk management.'}`;
 
   // Layer 2: Strategy Rules
   const rulesBlock = tradingRules
-    ? `## Strategy Rules\nThese are the hard rules you MUST follow. They define what you can trade, position sizes, risk limits, and exit criteria.\n\n${tradingRules}`
+    ? `## Strategy Rules\nThese rules define what to trade, position sizes, risk limits, and exit criteria.\n\n${tradingRules}`
     : '## No Strategy Rules Assigned\nNo trading rules have been configured. Use conservative defaults: max 10% per position, always use limit orders, maintain 50%+ cash.';
 
   // Layer 3: System Instructions (tools, heartbeat, operational)
@@ -724,7 +724,7 @@ ${userBlock}`;
       // on the same session already have it in context, saving ~2000 tokens/beat
       const isNewSession = !this._sessionId;
       const fullPrompt = isNewSession
-        ? `[SYSTEM INSTRUCTIONS - Follow these at all times]\n${this.systemPrompt}\n\n[END SYSTEM INSTRUCTIONS]\n\n${prompt}`
+        ? `${this.systemPrompt}\n\n${prompt}`
         : prompt;
 
       if (!this._isMessageBeat) {
